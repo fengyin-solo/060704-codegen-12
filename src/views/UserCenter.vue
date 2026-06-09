@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useDiaryStore } from '@/stores/diary'
 import { useInventoryStore } from '@/stores/inventory'
+import { useAchievements } from '@/composables/useAchievements'
 import { pluginLoader } from '@/engine/PluginLoader'
 import { globalTimeline } from '@/engine/Timeline'
-import { DiaryState, STATE_NAMES, STATE_COLORS } from '@/types'
+import { DiaryState, STATE_NAMES, STATE_COLORS, BADGE_TIER_COLORS } from '@/types'
 import type { TombstoneStyle } from '@/types'
+
+const router = useRouter()
+const achievements = useAchievements()
 
 const userStore = useUserStore()
 const diaryStore = useDiaryStore()
@@ -41,6 +46,31 @@ const diaryStats = computed(() => {
 const totalItems = computed(() => {
   return inventoryStore.inventory.reduce((sum, item) => sum + item.count, 0)
 })
+
+const achievementStats = computed(() => {
+  if (!userStore.currentUserId) return null
+  return achievements.getProgress(
+    userStore.currentUserId,
+    diaryStore.diaries,
+    diaryStore.archivedDiaries
+  )
+})
+
+const unlockedBadgesCount = computed(() => {
+  if (!achievementStats.value) return 0
+  return achievementStats.value.filter(p => p.unlocked).length
+})
+
+const totalBadgesCount = computed(() => achievements.totalBadges.value)
+
+const achievementCompletionRate = computed(() => {
+  if (totalBadgesCount.value === 0) return 0
+  return Math.round((unlockedBadgesCount.value / totalBadgesCount.value) * 100)
+})
+
+function goToAchievements() {
+  router.push('/achievements')
+}
 
 const currentTimelineTime = computed(() => {
   return globalTimeline.getCurrentTime()
@@ -222,6 +252,15 @@ onMounted(() => {
               </button>
             </template>
           </div>
+
+          <div v-if="!editMode" class="mt-3">
+            <button
+              class="w-full btn-pixel text-yellow-400 border-yellow-400/50 hover:border-yellow-400"
+              @click="goToAchievements"
+            >
+              🏆 成就墙 ({{ unlockedBadgesCount }}/{{ totalBadgesCount }})
+            </button>
+          </div>
         </div>
 
         <div class="p-4 rounded-lg border-2 border-gray-700 bg-gray-800/50">
@@ -269,6 +308,20 @@ onMounted(() => {
             <div class="text-center p-3 rounded bg-gray-700/30">
               <div class="font-vt323 text-3xl text-diary-fresh">{{ totalItems }}</div>
               <div class="text-gray-400 font-vt323 text-sm">道具数量</div>
+            </div>
+            <div
+              class="text-center p-3 rounded bg-gray-700/30 cursor-pointer hover:bg-gray-700/50 transition-colors"
+              @click="goToAchievements"
+            >
+              <div class="font-vt323 text-3xl text-yellow-400">{{ unlockedBadgesCount }}/{{ totalBadgesCount }}</div>
+              <div class="text-gray-400 font-vt323 text-sm">🏆 徽章解锁</div>
+            </div>
+            <div
+              class="text-center p-3 rounded bg-gray-700/30 cursor-pointer hover:bg-gray-700/50 transition-colors"
+              @click="goToAchievements"
+            >
+              <div class="font-vt323 text-3xl text-yellow-400">{{ achievementCompletionRate }}%</div>
+              <div class="text-gray-400 font-vt323 text-sm">🏆 成就完成度</div>
             </div>
           </div>
 

@@ -51,6 +51,16 @@ const routes: RouteRecordRaw[] = [
     path: '/gallery',
     name: 'Gallery',
     component: () => import('@/views/Gallery.vue')
+  },
+  {
+    path: '/achievements',
+    name: 'AchievementWall',
+    component: () => import('@/views/AchievementWall.vue')
+  },
+  {
+    path: '/achievements/:userId',
+    name: 'UserAchievementWall',
+    component: () => import('@/views/AchievementWall.vue')
   }
 ]
 

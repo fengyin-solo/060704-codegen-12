@@ -236,3 +236,74 @@ export const TIME_PERIOD_NAMES: Record<TimePeriod, string> = {
   [TimePeriod.YEAR]: '年度珍藏',
   [TimePeriod.ALL]: '全部时光'
 }
+
+export enum BadgeCategory {
+  EXHIBITION = 'exhibition',
+  REPAIR = 'repair',
+  SURVIVAL = 'survival'
+}
+
+export const BADGE_CATEGORY_NAMES: Record<BadgeCategory, string> = {
+  [BadgeCategory.EXHIBITION]: '公开展出',
+  [BadgeCategory.REPAIR]: '修复次数',
+  [BadgeCategory.SURVIVAL]: '存活时长'
+}
+
+export const BADGE_CATEGORY_ICONS: Record<BadgeCategory, string> = {
+  [BadgeCategory.EXHIBITION]: '🏛️',
+  [BadgeCategory.REPAIR]: '🔧',
+  [BadgeCategory.SURVIVAL]: '⏳'
+}
+
+export enum BadgeTier {
+  BRONZE = 'bronze',
+  SILVER = 'silver',
+  GOLD = 'gold',
+  PLATINUM = 'platinum'
+}
+
+export const BADGE_TIER_NAMES: Record<BadgeTier, string> = {
+  [BadgeTier.BRONZE]: '青铜',
+  [BadgeTier.SILVER]: '白银',
+  [BadgeTier.GOLD]: '黄金',
+  [BadgeTier.PLATINUM]: '铂金'
+}
+
+export const BADGE_TIER_COLORS: Record<BadgeTier, string> = {
+  [BadgeTier.BRONZE]: '#cd7f32',
+  [BadgeTier.SILVER]: '#c0c0c0',
+  [BadgeTier.GOLD]: '#ffd700',
+  [BadgeTier.PLATINUM]: '#e5e4e2'
+}
+
+export interface Badge {
+  id: string
+  category: BadgeCategory
+  tier: BadgeTier
+  name: string
+  description: string
+  icon: string
+  requirement: number
+  requirementUnit: string
+}
+
+export interface UserAchievement {
+  userId: string
+  unlockedBadges: string[]
+  unlockedAt: Record<string, number>
+  stats: {
+    totalExhibitions: number
+    totalRepairs: number
+    longestSurvival: number
+    currentStreak: number
+  }
+}
+
+export interface AchievementProgress {
+  badge: Badge
+  current: number
+  required: number
+  unlocked: boolean
+  unlockedAt?: number
+  progress: number
+}

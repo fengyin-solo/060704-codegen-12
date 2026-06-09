@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { User } from '@/types'
+import type { User, UserAchievement } from '@/types'
 import { storage } from '@/utils/storage'
 import { generateId } from '@/utils/id'
+import { useAchievements } from '@/composables/useAchievements'
 
 export const useUserStore = defineStore('user', () => {
   const users = ref<User[]>([])
@@ -102,6 +103,27 @@ export const useUserStore = defineStore('user', () => {
     return users.value.find(u => u.id === userId)
   }
 
+  function getUserAchievement(userId: string): UserAchievement {
+    const achievements = useAchievements()
+    return achievements.initUserAchievements(userId)
+  }
+
+  const currentUserAchievement = computed(() => {
+    if (!currentUserId.value) return null
+    return getUserAchievement(currentUserId.value)
+  })
+
+  function updateUserAchievements(
+    userId: string,
+    diaries: any[],
+    archivedDiaries: any[]
+  ): { achievement: UserAchievement; newlyUnlocked: string[] } {
+    const achievements = useAchievements()
+    const achievement = achievements.updateStats(userId, diaries, archivedDiaries)
+    const newlyUnlocked = achievements.checkAndUnlockBadges(userId, achievement)
+    return { achievement, newlyUnlocked }
+  }
+
   return {
     users,
     currentUserId,
@@ -109,6 +131,7 @@ export const useUserStore = defineStore('user', () => {
     visitingUserId,
     visitingUser,
     publicUsers,
+    currentUserAchievement,
     init,
     registerUser,
     login,
@@ -116,6 +139,8 @@ export const useUserStore = defineStore('user', () => {
     updateUser,
     startVisiting,
     stopVisiting,
-    getUserById
+    getUserById,
+    getUserAchievement,
+    updateUserAchievements
   }
 })
